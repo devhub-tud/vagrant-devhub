@@ -15,6 +15,7 @@ start() {
 		echo "java -DDOCKER_HOST=http://127.0.0.1:4243 -jar build-server.jar >> server.log 2>&1 &" >> $startScript
 		echo "echo \$! > $pidFile" >> $startScript
 		chmod +x $startScript
+		chown build:build $startScript
 
 		echo "Starting build-server..."
 		su -l build -c $startScript
