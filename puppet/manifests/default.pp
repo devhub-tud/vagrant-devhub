@@ -1,5 +1,103 @@
 # include devhub::build-server
 include devhub::git-server
+include devhub::devhub-server
+
+class devhub::devhub-server {
+
+  include jdk_oracle
+  include postgresql::server
+
+  class { 'maven::maven':
+   version => '3.3.9'
+  }
+
+  postgresql::server::db { 'devhub':
+   user     => 'devhub',
+   password => postgresql_password('devhub', 'mypassword'),
+  }
+
+  class { 'ldap' :
+    uri          => 'ldap.devhub.local',
+    base         => 'dc=devhub,dc=local',
+    organization => 'Devhub',
+    commonname   => 'devhub',
+    domain_name  => 'devhub.local',
+    ssl          => true,
+  }
+
+  ldap::user { 'admin':
+   email        => 'admin@devhub.local',
+   uname        => 'admin',
+   firstName    => 'Administrator',
+   lastName     => '',
+   create_local => false
+  }
+
+  user { 'devhub':
+   ensure => 'present',
+   managehome => true
+  }
+
+  file { '/etc/devhub-server':
+    ensure => 'directory',
+    owner => 'devhub',
+    group => 'devhub',
+    mode => '755',
+    require => User['devhub']
+  }
+
+  file { '/etc/devhub-server/config':
+    ensure => 'directory',
+    owner => 'devhub',
+    group => 'devhub',
+    mode => '755',
+    require => File['/etc/devhub-server']
+  }
+
+  file { '/etc/devhub-server/config/config.properties':
+    ensure => 'present',
+    owner => 'devhub',
+    group => 'devhub',
+    require => File['/etc/devhub-server/config'],
+    source => '/vagrant/files/config/devhub-server.properties'
+  }
+
+  file { '/etc/devhub-server/config/persistence.properties':
+      ensure => 'present',
+      owner => 'devhub',
+      group => 'devhub',
+      require => File['/etc/devhub-server/config'],
+      source => '/vagrant/files/config/devhub-persistence.properties'
+    }
+
+  file { '/etc/init.d/devhub-server':
+    ensure => 'present',
+    owner => 'root',
+    group => 'root',
+    mode => '755',
+    source => '/vagrant/files/services/devhub-server.sh'
+  }
+
+  exec { 'deploy devhub-server' :
+    command => '/usr/sbin/service devhub-server deploy',
+    user => 'root',
+    require => [
+      User['devhub'],
+      File['/etc/init.d/devhub-server'],
+      File['/etc/devhub-server/config/config.properties'],
+      File['/etc/devhub-server/config/persistence.properties'],
+      Class['postgresql::server'],
+      Class['maven::maven'],
+      Class['jdk_oracle'],
+      Class['ldap']
+    ]
+  }
+
+  service { 'devhub-server' :
+    ensure => running,
+    require => Exec['deploy devhub-server']
+  }
+}
 
 class devhub::git-server {
 
@@ -186,15 +284,3 @@ class devhub::build-server {
   }
 
 }
-
-
-#class { 'postgresql::server': }
-#
-#postgresql::server::db { 'devhub':
-#  user     => 'devhub',
-#  password => postgresql_password('devhub', 'mypassword'),
-#}
-#
-#class { 'gitolite':
-#  admin_pub_key => file('/keys/id_rsa.pub'),
-#}
