@@ -1,0 +1,8 @@
+.idea/
+.vagrant/
+*.iml
+.DS_store
+.tmp/
+puppet/modules/
+.librarian/
+*.lock
