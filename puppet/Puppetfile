@@ -6,6 +6,3 @@ mod 'maestrodev/maven'
 mod 'puppetlabs/docker_platform'
 mod 'nvpuppet/gitolite'
 mod 'puppetlabs/postgresql'
-
-mod 'alkivi/ldap',
-  :git => "git://github.com/alkivi-sas/puppet-ldap.git"

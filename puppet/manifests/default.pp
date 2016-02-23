@@ -1,36 +1,20 @@
+include jdk_oracle
+
+class { 'maven::maven':
+ version => '3.3.9'
+}
+
 # include devhub::build-server
 include devhub::git-server
 include devhub::devhub-server
 
 class devhub::devhub-server {
 
-  include jdk_oracle
   include postgresql::server
-
-  class { 'maven::maven':
-   version => '3.3.9'
-  }
 
   postgresql::server::db { 'devhub':
    user     => 'devhub',
    password => postgresql_password('devhub', 'mypassword'),
-  }
-
-  class { 'ldap' :
-    uri          => 'ldap.devhub.local',
-    base         => 'dc=devhub,dc=local',
-    organization => 'Devhub',
-    commonname   => 'devhub',
-    domain_name  => 'devhub.local',
-    ssl          => true,
-  }
-
-  ldap::user { 'admin':
-   email        => 'admin@devhub.local',
-   uname        => 'admin',
-   firstName    => 'Administrator',
-   lastName     => '',
-   create_local => false
   }
 
   user { 'devhub':
@@ -78,7 +62,7 @@ class devhub::devhub-server {
     source => '/vagrant/files/services/devhub-server.sh'
   }
 
-  exec { 'deploy devhub-server' :
+  exec { 'deploy devhub-server':
     command => '/usr/sbin/service devhub-server deploy',
     user => 'root',
     require => [
@@ -88,24 +72,17 @@ class devhub::devhub-server {
       File['/etc/devhub-server/config/persistence.properties'],
       Class['postgresql::server'],
       Class['maven::maven'],
-      Class['jdk_oracle'],
-      Class['ldap']
+      Class['jdk_oracle']
     ]
   }
 
-  service { 'devhub-server' :
+  service { 'devhub-server':
     ensure => running,
     require => Exec['deploy devhub-server']
   }
 }
 
 class devhub::git-server {
-
-  include jdk_oracle
-
-  class { 'maven::maven':
-   version => '3.3.9'
-  }
 
   class { 'gitolite':
    admin_pub_key => file('/keys/id_rsa.pub'),
@@ -167,7 +144,7 @@ class devhub::git-server {
     source => '/vagrant/files/services/git-server.sh'
   }
 
-  exec { 'deploy git-server' :
+  exec { 'deploy git-server':
     command => '/usr/sbin/service git-server deploy',
     user => 'root',
     require => [
@@ -186,31 +163,30 @@ class devhub::git-server {
     require => Exec['deploy git-server']
   }
 
+  exec { 'forward port':
+    command => '/sbin/iptables -t nat -A OUTPUT -o lo -p tcp --dport 2222 -j REDIRECT --to-port 22',
+    user => 'root'
+  }
+
 }
 
 class devhub::build-server {
-
-  include jdk_oracle
-
-  class { 'maven::maven':
-   version => '3.3.9'
-  }
 
   package { "git":
     ensure		=> present,
   }
 
   group { 'build' :
-   ensure => 'present',
-   gid => '1004'
+    ensure => 'present',
+    gid => '1004'
   }
 
   user { 'build':
-   ensure => 'present',
-   gid => '1004',
-   uid => '1003',
-   managehome => true,
-   require => Group['build']
+    ensure => 'present',
+    gid => '1004',
+    uid => '1003',
+    managehome => true,
+    require => Group['build']
   }
 
   class { 'docker':
@@ -257,7 +233,7 @@ class devhub::build-server {
     source => '/vagrant/files/services/build-server.sh'
   }
 
-  exec { 'deploy build-server' :
+  exec { 'deploy build-server':
     command => '/usr/sbin/service build-server deploy',
     user => 'root',
     require => [
@@ -272,7 +248,7 @@ class devhub::build-server {
     ]
   }
 
-  service { 'build-server' :
+  service { 'build-server':
     ensure => running,
     require => Exec['deploy build-server']
   }
