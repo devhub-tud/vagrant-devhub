@@ -62,6 +62,12 @@ class devhub::devhub-server {
     source => '/vagrant/files/services/devhub-server.sh'
   }
 
+  class { 'ldap::server':
+    suffix  => 'dc=devhub,dc=local',
+    rootdn  => 'cn=admin,dc=devhub,dc=local',
+    rootpw  => 'admin',
+  }
+
   exec { 'deploy devhub-server':
     command => '/usr/sbin/service devhub-server deploy',
     user => 'root',
@@ -72,6 +78,7 @@ class devhub::devhub-server {
       File['/etc/devhub-server/config/persistence.properties'],
       Class['postgresql::server'],
       Class['maven::maven'],
+      Class['ldap::server'],
       Class['jdk_oracle']
     ]
   }

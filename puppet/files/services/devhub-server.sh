@@ -54,9 +54,11 @@ EOF
 
 deploy() {
         su devhub << 'EOF'
+        cp -f /etc/devhub-server/config/config.properties /etc/devhub-server/config/config_backup.properties
         cp -f /etc/devhub-server/config/persistence.properties /etc/devhub-server/config/persistence_backup.properties
         cp -rf /etc/devhub-server/tmp/devhub/target/devhub-server-distribution/devhub-server/. /etc/devhub-server/.
         mv /etc/devhub-server/config/persistence_backup.properties /etc/devhub-server/config/persistence.properties
+        mv /etc/devhub-server/config/config_backup.properties /etc/devhub-server/config/config.properties
         rm -rf /etc/devhub-server/tmp
 EOF
 }
