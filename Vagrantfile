@@ -26,7 +26,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 		config.vm.define "devhub" do |devhub|
 			config.vm.network "forwarded_port", guest: 8080, host: 8080
-			config.vm.network "forwarded_port", guest: 8081, host: 8081
+			# The git server microservice does not support authentication
+			# The git server can be exposed from the VM for convenience,
+			# but be aware of the security consequences!
+			# config.vm.network "forwarded_port", guest: 8081, host: 8081
 			puppet.manifest_file = "default.pp"
 		end
 
