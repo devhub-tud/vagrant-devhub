@@ -4,7 +4,7 @@ class { 'maven::maven':
  version => '3.3.9'
 }
 
-# include devhub::build-server
+include devhub::build-server
 include devhub::git-server
 include devhub::devhub-server
 
@@ -179,11 +179,11 @@ class devhub::git-server {
 
 class devhub::build-server {
 
-  package { "git":
+  package { 'git':
     ensure		=> present,
   }
 
-  group { 'build' :
+  group { 'build':
     ensure => 'present',
     gid => '1004'
   }
@@ -196,9 +196,74 @@ class devhub::build-server {
     require => Group['build']
   }
 
+  file { '/etc/docker':
+    ensure => 'directory'
+  }
+
+  file { '/etc/docker/tls':
+    ensure => 'directory',
+    require => File['/etc/docker']
+  }
+
+  file { '/etc/docker/tls/setup_keys.sh':
+    ensure => 'present',
+    source => '/vagrant/files/scripts/setup_keys.sh',
+    mode => '744',
+    require => File['/etc/docker/tls']
+  }
+
+  exec { 'ssh_keys':
+    command => '/etc/docker/tls/setup_keys.sh',
+    cwd => '/etc/docker/tls',
+    creates => '/etc/docker/tls/server-cert.pem',
+    require => File['/etc/docker/tls/setup_keys.sh'],
+    user => root,
+    logoutput => true
+  }
+
   class { 'docker':
-    tcp_bind        => '0.0.0.0:4243',
-    socket_bind     => 'unix:///var/run/docker.sock'
+    tcp_bind        => ['tcp://0.0.0.0:2376'],
+    tls_enable      => true,
+    tls_cacert      => '/etc/docker/tls/ca.pem',
+    tls_cert        => '/etc/docker/tls/server-cert.pem',
+    tls_key         => '/etc/docker/tls/server-key.pem',
+    socket_bind     => 'unix:///var/run/docker.sock',
+    require         => Exec['ssh_keys']
+  }
+
+  file { '/home/build/.docker':
+    ensure => 'directory',
+    owner => 'build',
+    group => 'build',
+    mode => '755',
+    require => User['build']
+  }
+
+  file { '/home/build/.docker/ca.pem':
+    ensure => 'present',
+    source => '/etc/docker/tls/ca.pem',
+    owner => 'build',
+    group => 'build',
+    mode => '444',
+    require => [Exec['ssh_keys'], User['build']]
+  }
+
+  file { '/home/build/.docker/cert.pem':
+    ensure => 'present',
+    source => '/etc/docker/tls/cert.pem',
+    owner => 'build',
+    group => 'build',
+    mode => '444',
+    require => [Exec['ssh_keys'], User['build']]
+  }
+
+  file { '/home/build/.docker/key.pem':
+    ensure => 'present',
+    source => '/etc/docker/tls/key.pem',
+    owner => 'build',
+    group => 'build',
+    mode => '444',
+    require => [Exec['ssh_keys'], User['build']]
   }
 
   file { '/etc/build-server':
@@ -257,7 +322,12 @@ class devhub::build-server {
 
   service { 'build-server':
     ensure => running,
-    require => Exec['deploy build-server']
+    require => [
+      File['/home/build/.docker/ca.pem'],
+      File['/home/build/.docker/cert.pem'],
+      File['/home/build/.docker/key.pem'],
+      Exec['deploy build-server']
+    ]
   }
 
   docker::image { 'java-maven':

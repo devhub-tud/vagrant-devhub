@@ -15,7 +15,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	config.vm.network "forwarded_port", guest: 8080, host: 8080
 	config.vm.network "forwarded_port", guest: 8081, host: 8081
-	# config.vm.network "forwarded_port", guest: 8082, host: 8082
+	config.vm.network "forwarded_port", guest: 8082, host: 8082
 
 	config.puppet_install.puppet_version = "3.8.1"
 	config.librarian_puppet.puppetfile_dir = "puppet"

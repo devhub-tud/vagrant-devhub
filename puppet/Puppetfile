@@ -3,7 +3,7 @@ forge "https://forgeapi.puppetlabs.com"
 mod 'puppetlabs/apt'
 mod 'tylerwalts/jdk_oracle'
 mod 'maestrodev/maven'
-mod 'puppetlabs/docker_platform'
+mod 'garethr/docker'
 mod 'nvpuppet/gitolite'
 mod 'puppetlabs/postgresql'
 mod 'datacentred/ldap'

@@ -11,8 +11,9 @@ start() {
 		rm -f $startScript
 		touch $startScript
 		echo "cd /etc/build-server" >> $startScript
-		# -DDOCKER_CERT_PATH=/home/build/.docker
-		echo "java -DDOCKER_HOST=http://127.0.0.1:4243 -jar build-server.jar >> server.log 2>&1 &" >> $startScript
+		echo "export DOCKER_HOST=http://127.0.0.1:2376" >> $startScript
+		echo "export DOCKER_CERT_PATH=/home/build/.docker/" >> $startScript
+		echo "java -jar build-server.jar >> server.log 2>&1 &" >> $startScript
 		echo "echo \$! > $pidFile" >> $startScript
 		chmod +x $startScript
 		chown build:build $startScript
