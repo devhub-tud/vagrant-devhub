@@ -36,7 +36,7 @@ vagrant up build
 The Puppet scripts can also be used to deploy a bare server.
 You need `puppet` and `librarian-puppet` for this.
 
-```
+```sh
 sudo apt-get install -y virtualbox vagrant rubygems ruby build-essential puppet
 gem install librarian-puppet
 git clone https://github.com/devhub-tud/vagrant-devhub.git
@@ -94,3 +94,10 @@ For more information, see: https://help.ubuntu.com/lts/serverguide/openldap-serv
 ### Using another directory server
 It is possible to connect DevHub to an external LDAP directory, such as Active Directory.
 The parameters which DevHub uses to connect to the LDAP server are defined in `devhub-server.properties`.
+
+## Docker API protection
+For security, the Docker API for the build server is configured with a [client certificate](https://docs.docker.com/engine/security/https/).
+Without this security, build containers would technically be able to connect to the Docker API on the host.
+The HTTPS certificates are created in the provisioning process using a self-signed CA.
+By default the issued certificate expires after one year.
+It is possible to exchange the default certificates by storing them under `/etc/docker/tls` for the server certificates and `/build/.docker` for the client certificates. 
