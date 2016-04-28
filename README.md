@@ -20,6 +20,7 @@ The commands listed below assume you have not installed `vagrant-librarian-puppe
 
 ```sh
 git clone https://github.com/devhub-tud/vagrant-devhub.git
+cd vagrant-devhub
 vagrant plugin install vagrant-librarian-puppet
 vagrant up
 ```
