@@ -6,8 +6,9 @@ The project consists of a Vagrant Multi-Machine configuration, consisting of two
 * A Build server with a Docker host which can be used for enabling Continuous Integration for DevHub.
 
 *Both machines share your `~/.ssh` key folder.
-This key is used as administrator key for the Gitolite installation.
-Furthermore, the build server uses your public key to have read access on the repositories.
+The SSH public key is used by Gitolite as a master key, so you are allowed to SSH to the Git daemon and administration repository.
+The SSH private key is used by the Git API server, in order to obtain R/W access to Gitolite repositories.
+Furthermore, the private key is used by the Build server, which uses it in order to obtain read access to the repositories.
 Your local SSH key essentially becomes the master key for Devhub.
 If you want to use another SSH key for the machines, modify the `/keys` folder sharing in the Vagrant file.*
 
