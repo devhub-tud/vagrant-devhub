@@ -31,6 +31,19 @@ vagrant up devhub
 vagrant up build
 ```
 
+### Bare server provisioning
+The Puppet scripts can also be used to deploy a bare server.
+You need `puppet` and `librarian-puppet` for this.
+
+```
+sudo apt-get install -y virtualbox vagrant rubygems ruby build-essential puppet
+gem install librarian-puppet
+git clone https://github.com/devhub-tud/vagrant-devhub.git
+cd vagrant-devhub
+librarian-puppet install
+puppet apply --modulepath puppet/modules puppet/manifests/default.pp --verbose --debug
+```
+
 ## Login to Devhub
 The administrator user is `admin` / `admin`, installed as `cn=admin,dc=devhub,dc=local` in openldap.
 This user can be used to log in to DevHub, but also to add new users to the DevHub instance.
