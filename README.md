@@ -15,8 +15,8 @@ If you want to use another SSH key for the machines, modify the `/keys` folder s
 ## Install
 Ensure that you have [Vagrant](https://www.vagrantup.com) installed on your local system.
 Vagrant also needs a virtualization platform to run on. We recommend to install [VirtualBox](https://www.virtualbox.org) with Vagrant.
-We use `vagrant-librarian-puppet` in order to download the required Puppet libraries.
-The commands listed below assume you have not installed `vagrant-librarian-puppet` yet.
+We use `vagrant-librarian-puppet` in order to download the required Puppet libraries and `vagrant-puppet-install` to ensure the VM runs the required version of Puppet.
+The commands listed below assume you have not installed `vagrant-librarian-puppet` and `vagrant-puppet-install` yet.
 
 ```sh
 git clone https://github.com/devhub-tud/vagrant-devhub.git
@@ -39,7 +39,7 @@ The Puppet scripts can also be used to deploy a bare server.
 You need `puppet` and `librarian-puppet` for this.
 
 ```sh
-sudo apt-get install -y virtualbox vagrant rubygems ruby build-essential puppet
+sudo apt-get install -y rubygems ruby build-essential puppet
 gem install librarian-puppet
 git clone https://github.com/devhub-tud/vagrant-devhub.git
 cd vagrant-devhub
